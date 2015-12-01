@@ -24,7 +24,7 @@
 	  <button onclick="login()">Login</button>
 
 	<script>
-		/*function login(){
+		function login(){
 			//variables
 		    var packet = {
 		      type:"login",
@@ -38,9 +38,14 @@
 	    	packet.data=document.getElementById("usname").value;
 	    	console.log(packet.data);
 	    	socket.emit('login', JSON.stringify(packet));
-	    	//redirect
-	    	window.location.replace("main.html");
-		}	*/
+
+	    	//wait for server response
+	    	socket.on('server', function(data) {
+	    		//redirect
+	    		window.location.replace("main.html");
+       
+    		});
+		}	
     </script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------
-// The purpose is to serve a file!
-// First, run node server.js on one terminal
+// SE319 Lab 11
+// First, run node server.js in a terminal
 // Next, type localhost:4000/index.html on some browser
 //---------------------------------------------------------------
 
@@ -10,9 +10,15 @@ var http = require('http');
 var fs   = require('fs');
 var server = http.createServer();
 var usersConnected = Array();
+var posts = Array();
 var packet = {
   type:"",
   data:""
+};
+var post = {
+  title:"",
+  data:"",
+  user:""
 };
 
 // attach handler
@@ -47,8 +53,14 @@ server.listen(4000);
 
 /*websocket stuff*/
 var io = require('socket.io').listen(5000);
+var CLIENTS=[];
 
 io.sockets.on('connection', function(socket) {
+  //add new client to list of clients connected
+  CLIENTS.push(socket);
+
+  //say that a client connected
+  console.log("Client Connected!");
 
   socket.on('myEvent', function(content) {
     console.log(content); 
@@ -64,16 +76,18 @@ io.sockets.on('connection', function(socket) {
     
   });
 
+  //event to get everyone who is connected
   socket.on('getUsers', function(content) {
-    console.log(content);
+    console.log("Get Users: " + content);
 
     //parse JSON
     var pkt = JSON.parse(content);
 
     //loop through array of users and emit them each back
-
-    //emit all the users in the array
-    socket.emit('server', "This is the server: got your message");
+    for (var i=0; i<usersConnected.length; i++) {
+      pkt.data = usersConnected[i];
+      socket.emit('server', JSON.stringify(pkt));
+    }
     
   });
 
@@ -81,7 +95,7 @@ io.sockets.on('connection', function(socket) {
   socket.on('login', function(content) {
 
     //display in console
-    console.log("Server " +content); 
+    console.log("Login:" + content); 
 
     //parse the json so we can work with it
     var pkt = JSON.parse(content);
@@ -91,20 +105,45 @@ io.sockets.on('connection', function(socket) {
     //if good, add user to the list
     usersConnected.push(pkt.data);
 
-
-    //show who is logged in
-    socket.emit('server', content);
+    //tell everyone who logged in
+    sendAll(content);
     
   });
 
   //logout
   socket.on('logout', function(content) {
 
-    //logout the person and redirect
-    console.log(content); 
+    //display in console
+    console.log("Logout:" + content);
 
-    socket.emit('server', "Logged in: USERNAME HERE");
+    //parse the json so we can work with it
+    var pkt = JSON.parse(content);
+
+    //remove user from the usersConnected array
+    for(var i=0; i<usersConnected.length; i++){
+      if(pkt.data == usersConnected[i]){
+        usersConnected.splice(i, 1);
+        pkt.data = "success";
+        break;
+      }
+      
+    }
+
+    //broadcast success message
+    //socket.emit('server', JSON.stringify(pkt));
+    sendAll(JSON.stringify(pkt));
     
   });
 
 });
+
+//broadcast the content to everyone connected
+function sendAll(content){
+  //show what is happening
+  console.log("Send All!");
+
+  //loop through every client in the array
+  for(var i=0; i<CLIENTS.length; i++){
+    CLIENTS[i].emit('server',content);
+  }
+}

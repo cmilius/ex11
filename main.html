@@ -52,11 +52,13 @@
     packet.data="Jimmy";
     socket.emit('login', JSON.stringify(packet));*/
 
-    packet.type="post";
+    /*packet.type="post";
     packet.data="Yadda yadda";
-    socket.emit('login', JSON.stringify(packet));
+    socket.emit('login', JSON.stringify(packet));*/
 
-    
+    packet.type="getUsers";
+    packet.data="NA";
+    socket.emit('getUsers', JSON.stringify(packet));
 
     // Attach event handler for event fired by server
     //basically catch whatever the server sends back
@@ -80,6 +82,17 @@
        else if(pkt.type == "getUsers"){
         users.innerHTML += "<br>" + pkt.data; // append data that we got back
        }
+       else if(pkt.type == "logout"){
+        users.innerHTML = "<b>Users Logged In</b><br><br>"
+
+        //get who is still logged in
+        packet.type="getUsers";
+        packet.data="NA";
+        socket.emit('getUsers', JSON.stringify(packet));
+       }
+       else{
+        users.innerHTML += "<br>" + pkt.data; 
+       }
        
     });
 
@@ -87,9 +100,12 @@
 
     function myFunction() {
       //document.getElementById("logout").innerHTML = "YOU CLICKED ME!";
-      packet.type="login";
+      packet.type="logout";
       packet.data="billy";
-      socket.emit('login', JSON.stringify(packet));
+      socket.emit('logout', JSON.stringify(packet));
+
+      //redirect
+      window.location.replace("index.html");
     }   
 
   </script>
