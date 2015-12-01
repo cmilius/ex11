@@ -14,6 +14,7 @@
       type:"a",
       data:"a"
     };
+    var user = "none";
 
     // connect to WEBSOCKET server
     var socket = io.connect('http://localhost:5000');
@@ -56,9 +57,15 @@
     packet.data="Yadda yadda";
     socket.emit('login', JSON.stringify(packet));*/
 
+    //get a list of everyone who is logged in
     packet.type="getUsers";
     packet.data="NA";
     socket.emit('getUsers', JSON.stringify(packet));
+
+    //get who last logged in (should be you)
+    packet.type="getNew";
+    packet.data="NA";
+    socket.emit('getNew', JSON.stringify(packet));
 
     // Attach event handler for event fired by server
     //basically catch whatever the server sends back
@@ -75,6 +82,10 @@
        if(pkt.type == "login"){
         //display the user
         users.innerHTML += "<br>" + pkt.data;
+       }
+       else if(pkt.type == "getNew"){
+        user = pkt.data;
+        console.log("getNew " + pkt.data);
        }
        else if(pkt.type == "post"){
         posts.innerHTML += "<br>" + pkt.data; // append data that we got back
@@ -96,12 +107,13 @@
        
     });
 
-    document.getElementById("logout").onclick = function() {myFunction()};
+    //logout code
+    document.getElementById("logout").onclick = function() {log_out()};
 
-    function myFunction() {
+    function log_out() {
       //document.getElementById("logout").innerHTML = "YOU CLICKED ME!";
       packet.type="logout";
-      packet.data="billy";
+      packet.data=user;
       socket.emit('logout', JSON.stringify(packet));
 
       //redirect

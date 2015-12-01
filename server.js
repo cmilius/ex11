@@ -91,6 +91,19 @@ io.sockets.on('connection', function(socket) {
     
   });
 
+  //event to get the latest user
+  socket.on('getNew', function(content) {
+    console.log("Get New: " + content);
+
+    //parse JSON
+    var pkt = JSON.parse(content);
+
+    //emit back to who called it
+    pkt.data = usersConnected[usersConnected.length-1];
+    socket.emit('server', JSON.stringify(pkt));
+    
+  });
+
   //login
   socket.on('login', function(content) {
 
@@ -107,6 +120,11 @@ io.sockets.on('connection', function(socket) {
 
     //tell everyone who logged in
     sendAll(content);
+
+    /*pkt.type = "uname";
+
+    //tell the client who it is
+    socket.emit('server', JSON.stringify(pkt));*/
     
   });
 
@@ -128,6 +146,24 @@ io.sockets.on('connection', function(socket) {
       }
       
     }
+
+    //broadcast success message
+    //socket.emit('server', JSON.stringify(pkt));
+    sendAll(JSON.stringify(pkt));
+    
+  });
+
+    //logout
+  socket.on('addPost', function(content) {
+
+    //display in console
+    console.log("Add Post:" + content);
+
+    //parse the json so we can work with it
+    var pkt = JSON.parse(content);
+
+    //add post to the posts array
+    posts.push(pkt);
 
     //broadcast success message
     //socket.emit('server', JSON.stringify(pkt));
