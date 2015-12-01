@@ -1,0 +1,97 @@
+<html>
+<head>
+<!-- This is the websocket SERVER -->
+<script src="http://localhost:5000/socket.io/socket.io.js"></script>
+
+</head>
+<body>
+  <div id="menu"></div> 
+  <div id="posts" style="float: left"></div> 
+  <div id="logged_in" style="float: right"></div>
+  <script>
+    //variables
+    var packet = {
+      type:"a",
+      data:"a"
+    };
+
+    // connect to WEBSOCKET server
+    var socket = io.connect('http://localhost:5000');
+
+    //display logout button
+    document.getElementById('menu').innerHTML = "<button style=\"float: right\" id=\"logout\">Logout</button>";
+
+    //display the div headers
+    document.getElementById('posts').innerHTML = "<b>Posts</b<br><br>";
+    document.getElementById('logged_in').innerHTML = "<b>Users Logged In</b><br><br>";
+
+    var display = Array();
+    display[0] = "steve";
+    display[1] = "brad";
+    display[2] = "dave";
+
+
+    /*fs.writeFile("users_logged.txt", JSON.stringify(display), function(err) {
+      if(err) {
+        return console.log(err);
+      }
+
+      console.log("The file was saved!");
+    }); 
+
+    var obj;
+    fs.readFile('users_logged.txt', 'utf8', function (err, data) {
+      if (err) throw err;
+      obj = JSON.parse(data);
+    });*/
+
+
+    // Fire an event (that the server will handle
+    //socket.emit('myEvent', 'Hello Message from the client');
+    /*packet.type="login";
+    packet.data="Jimmy";
+    socket.emit('login', JSON.stringify(packet));*/
+
+    packet.type="post";
+    packet.data="Yadda yadda";
+    socket.emit('login', JSON.stringify(packet));
+
+    
+
+    // Attach event handler for event fired by server
+    //basically catch whatever the server sends back
+    socket.on('server', function(data) {
+       var posts = document.getElementById('posts'); 
+       var users = document.getElementById('logged_in'); 
+       console.log(data);
+       var pkt = JSON.parse(data);
+       
+       
+       //posts.innerHTML += "<br>" + data; // append data that we got back
+
+       //if packet is a login packet
+       if(pkt.type == "login"){
+        //display the user
+        users.innerHTML += "<br>" + pkt.data;
+       }
+       else if(pkt.type == "post"){
+        posts.innerHTML += "<br>" + pkt.data; // append data that we got back
+       }
+       else if(pkt.type == "getUsers"){
+        users.innerHTML += "<br>" + pkt.data; // append data that we got back
+       }
+       
+    });
+
+    document.getElementById("logout").onclick = function() {myFunction()};
+
+    function myFunction() {
+      //document.getElementById("logout").innerHTML = "YOU CLICKED ME!";
+      packet.type="login";
+      packet.data="billy";
+      socket.emit('login', JSON.stringify(packet));
+    }   
+
+  </script>
+</body>
+</html>

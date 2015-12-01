@@ -1,0 +1,46 @@
+<html>
+<head>
+	<!-- This is the websocket SERVER -->
+	<script src="http://localhost:5000/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+	<!--<form action="main.html" method="post">
+	  Username:<br>
+	  <input type="text" name="username" value="Charlie">
+	  <br>
+	  Password:<br>
+	  <input type="text" name="password" value="pswd">
+	  <br><br>
+	  <input type="submit" value="Login">
+	</form>-->
+
+	  Username:<br>
+	  <input type="text" id="usname" name="username" value="Charlie">
+	  <br>
+	  Password:<br>
+	  <input type="password" id="pswd" name="password" value="pswd">
+	  <br><br>
+	  <button onclick="login()">Login</button>
+
+	<script>
+		/*function login(){
+			//variables
+		    var packet = {
+		      type:"login",
+		      data:"a"
+		    };
+		    // connect to WEBSOCKET server
+  			var socket = io.connect('http://localhost:5000');
+
+			//send login packet
+			packet.type="login";
+	    	packet.data=document.getElementById("usname").value;
+	    	console.log(packet.data);
+	    	socket.emit('login', JSON.stringify(packet));
+	    	//redirect
+	    	window.location.replace("main.html");
+		}	*/
+    </script>
+</body>
+</html>
