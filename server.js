@@ -18,10 +18,11 @@ var packet = {
 var post = {
   title:"",
   data:"",
-  user:""
+  user:"",
+  id:"",
 };
 
-// attach handler
+//attach handler
 server.on('request', function (req,res) {
   var file = path.normalize('.' + req.url);
 
@@ -30,28 +31,30 @@ server.on('request', function (req,res) {
       var rs = fs.createReadStream(file);
 
       rs.on('error', function() {
-        res.writeHead(500); // error status
+        //error status 500
+        res.writeHead(500); 
         res.end('Internal Server Error');
       });
 
+      //ok status code
+      res.writeHead(200); 
 
-      res.writeHead(200); // ok status
-
-      // PIPE the read stream with the RESPONSE stream
+      //PIPE the read stream with the RESPONSE stream
       rs.pipe(res);
     } 
     else {
-      res.writeHead(404); // error status
+      //error status code
+      res.writeHead(404); 
       res.end('NOT FOUND');
     }
   });
 
 }); // end server on handler
 
+//listen on port 4000
 server.listen(4000);
 
-
-/*websocket stuff*/
+//websocket stuff
 var io = require('socket.io').listen(5000);
 var CLIENTS=[];
 
@@ -61,20 +64,6 @@ io.sockets.on('connection', function(socket) {
 
   //say that a client connected
   console.log("Client Connected!");
-
-  socket.on('myEvent', function(content) {
-    console.log(content); 
-    socket.emit('server', "This is the server: got your message");
-    var num = 3;
-
-    var interval = setInterval( function() {
-        socket.emit('server', num + ": message from server");
-        if (num-- == 0) { 
-          clearInterval(interval); // stops timer
-        }
-    }, 1000); // fire every 1 second
-    
-  });
 
   //event to get everyone who is connected
   socket.on('getUsers', function(content) {
@@ -119,13 +108,7 @@ io.sockets.on('connection', function(socket) {
     usersConnected.push(pkt.data);
 
     //tell everyone who logged in
-    sendAll(content);
-
-    /*pkt.type = "uname";
-
-    //tell the client who it is
-    socket.emit('server', JSON.stringify(pkt));*/
-    
+    sendAll(content);    
   });
 
   //logout
@@ -144,11 +127,9 @@ io.sockets.on('connection', function(socket) {
         pkt.data = "success";
         break;
       }
-      
     }
 
-    //broadcast success message
-    //socket.emit('server', JSON.stringify(pkt));
+    //broadcast success message to everyone
     sendAll(JSON.stringify(pkt));
     
   });
@@ -156,33 +137,69 @@ io.sockets.on('connection', function(socket) {
   //event for adding posts
   socket.on('add_post', function(content) {
 
+    //variable
+    var pst = {
+      title:"",
+      content:"",
+      user:"",
+      id:"",
+    };
+
     //display in console
     console.log("Add Post:" + content);
 
     //parse the json so we can work with it
     var pkt = JSON.parse(content);
 
-    //add post to the posts array
-    posts.push(pkt.data);
+    //build post object
+    pst.title = pkt.data.title;
+    pst.content = pkt.data.content;
+    pst.user = pkt.data.user;
+    pst.id = posts.length;
 
-    //broadcast success message
-    //socket.emit('server', JSON.stringify(pkt));
+    //add post to the posts array
+    posts.push(pst);
+
+    //broadcast success message to everyone
     sendAll(content);
     
   });
 
   //event to get everyone who is connected
   socket.on('getPosts', function(content) {
+    //display in console
     console.log("Get Posts: " + content);
 
     //parse JSON
     var pkt = JSON.parse(content);
 
     //loop through array of users and emit them each back
-    for (var i=0; i<posts.length; i++) {
+    for (var i=posts.length-1; i>=0; i--) {
       pkt.data = posts[i];
       socket.emit('server', JSON.stringify(pkt));
     }
+  });
+
+  //remove_post
+  socket.on('remove_post', function(content) {
+
+    //display in console
+    console.log("remove_post:" + content);
+
+    //parse the json so we can work with it
+    var pkt = JSON.parse(content);
+
+    //remove post from the posts array
+    posts.splice(pkt.data, 1);
+
+    //update all post ids
+    for(var i=0; i<posts.length; i++){
+      posts[i].id = i;
+    }
+
+    //broadcast success message
+    pkt.type = "add_post";
+    sendAll(JSON.stringify(pkt));
     
   });
 

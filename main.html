@@ -33,12 +33,6 @@
     document.getElementById('posts').innerHTML = "<b>Posts</b<br><br>";
     document.getElementById('logged_in').innerHTML = "<b>Users Logged In</b><br><br>";
 
-    var display = Array();
-    display[0] = "steve";
-    display[1] = "brad";
-    display[2] = "dave";
-
-
     /*fs.writeFile("users_logged.txt", JSON.stringify(display), function(err) {
       if(err) {
         return console.log(err);
@@ -52,17 +46,6 @@
       if (err) throw err;
       obj = JSON.parse(data);
     });*/
-
-
-    // Fire an event (that the server will handle
-    //socket.emit('myEvent', 'Hello Message from the client');
-    /*packet.type="login";
-    packet.data="Jimmy";
-    socket.emit('login', JSON.stringify(packet));*/
-
-    /*packet.type="post";
-    packet.data="Yadda yadda";
-    socket.emit('login', JSON.stringify(packet));*/
 
     //get a list of everyone who is logged in
     packet.type="getUsers";
@@ -82,55 +65,53 @@
     // Attach event handler for event fired by server
     //basically catch whatever the server sends back
     socket.on('server', function(data) {
-       var posts = document.getElementById('posts'); 
-       var users = document.getElementById('logged_in'); 
-       console.log(data);
-       var pkt = JSON.parse(data);
-       
-       
-       //posts.innerHTML += "<br>" + data; // append data that we got back
+      //page elements
+      var posts = document.getElementById('posts'); 
+      var users = document.getElementById('logged_in'); 
+      console.log(data);
+      var pkt = JSON.parse(data);
 
-       //if packet is a login packet
-       if(pkt.type == "login"){
+      //if packet is a login packet
+      if(pkt.type == "login"){
         //display the user
         users.innerHTML += "<br>" + pkt.data;
-       }
-       else if(pkt.type == "getNew"){
+      }
+      else if(pkt.type == "getNew"){
         user = pkt.data;
         console.log("getNew " + pkt.data);
-       }
-       else if(pkt.type == "add_post"){
+      }
+      else if(pkt.type == "add_post"){
+        //clear everything
+        posts.innerHTML = "<b>Posts</b<br><br>";
+
+        //get new list of the posts
+        packet.type="getPosts";
+        packet.data="NA";
+        socket.emit('getPosts', JSON.stringify(packet));
+      }
+      else if(pkt.type == "getPosts"){
         //build post string
-        var postString = "<br>" + pkt.data.title + "<br>" + pkt.data.content + "<br>Posted By: " + pkt.data.user;
-        var removeButton = "<br><button>" + "Remove</button>";
+        var postString = pkt.data.title + "<br>" + pkt.data.content + "<br>Posted By: " + pkt.data.user;
+        var id = pkt.data.id;
+        var removeButton = "<br><button onclick=\"remove_post(" + id + ")\">" + "Remove</button>";
 
         // append data that we got back
-        posts.innerHTML += postString + removeButton + "<hr>"; 
-        //alert(data);
-       }
-       else if(pkt.type == "getPosts"){
-        //build post string
-        var postString = "<br>" + pkt.data.title + "<br>" + pkt.data.content + "<br>Posted By: " + pkt.data.user;
-        var removeButton = "<br><button>" + "Remove</button>";
-
-        // append data that we got back
-        posts.innerHTML += postString + removeButton + "<hr>"; 
-        //alert(data);
-       }
-       else if(pkt.type == "getUsers"){
+        posts.innerHTML += "<br>" + "<hr>" + postString + removeButton /*+ id*/ + "<hr>"; 
+      }
+      else if(pkt.type == "getUsers"){
         users.innerHTML += "<br>" + pkt.data; // append data that we got back
-       }
-       else if(pkt.type == "logout"){
+      }
+      else if(pkt.type == "logout"){
         users.innerHTML = "<b>Users Logged In</b><br><br>"
 
         //get who is still logged in
         packet.type="getUsers";
         packet.data="NA";
         socket.emit('getUsers', JSON.stringify(packet));
-       }
-       else{
+      }
+      else{
         users.innerHTML += "<br>" + pkt.data; 
-       }
+      }
        
     });
 
@@ -151,7 +132,7 @@
     document.getElementById("addPost").onclick = function() {add_post()};
 
     function add_post() {
-      //document.getElementById("logout").innerHTML = "YOU CLICKED ME!";
+
       //make packet type addPost
       packet.type="add_post";
 
@@ -171,11 +152,15 @@
       //clear post fields
       document.getElementById("postTitle").value = "";
       document.getElementById("postContent").value = "Post content...";
-
-      //alert(document.getElementById("postTitle").value);
-      //alert(JSON.stringify(packet));
-
     }  
+
+    //remove post code
+    function remove_post(postID) {
+      //build packet for post to remove
+      packet.type="remove_post";
+      packet.data=postID;
+      socket.emit('remove_post', JSON.stringify(packet));
+    }
 
   </script>
 </body>
