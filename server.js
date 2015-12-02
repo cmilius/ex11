@@ -153,8 +153,8 @@ io.sockets.on('connection', function(socket) {
     
   });
 
-    //logout
-  socket.on('addPost', function(content) {
+  //event for adding posts
+  socket.on('add_post', function(content) {
 
     //display in console
     console.log("Add Post:" + content);
@@ -163,11 +163,26 @@ io.sockets.on('connection', function(socket) {
     var pkt = JSON.parse(content);
 
     //add post to the posts array
-    posts.push(pkt);
+    posts.push(pkt.data);
 
     //broadcast success message
     //socket.emit('server', JSON.stringify(pkt));
-    sendAll(JSON.stringify(pkt));
+    sendAll(content);
+    
+  });
+
+  //event to get everyone who is connected
+  socket.on('getPosts', function(content) {
+    console.log("Get Posts: " + content);
+
+    //parse JSON
+    var pkt = JSON.parse(content);
+
+    //loop through array of users and emit them each back
+    for (var i=0; i<posts.length; i++) {
+      pkt.data = posts[i];
+      socket.emit('server', JSON.stringify(pkt));
+    }
     
   });
 

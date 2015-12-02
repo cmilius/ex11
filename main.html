@@ -5,7 +5,14 @@
 
 </head>
 <body>
-  <div id="menu"></div> 
+  <div id="menu">
+    Post Title:
+    <input type="text" id="postTitle" name="username">
+    <br>
+    <textarea id="postContent" rows="4" cols="50">Post content...</textarea>
+    <br>
+    <button id="addPost">Add Post</button>
+  </div> 
   <div id="posts" style="float: left"></div> 
   <div id="logged_in" style="float: right"></div>
   <script>
@@ -20,7 +27,7 @@
     var socket = io.connect('http://localhost:5000');
 
     //display logout button
-    document.getElementById('menu').innerHTML = "<button style=\"float: right\" id=\"logout\">Logout</button>";
+    document.getElementById('menu').innerHTML += "<button style=\"float: right\" id=\"logout\">Logout</button>";
 
     //display the div headers
     document.getElementById('posts').innerHTML = "<b>Posts</b<br><br>";
@@ -67,6 +74,11 @@
     packet.data="NA";
     socket.emit('getNew', JSON.stringify(packet));
 
+    //get a list of posts
+    packet.type="getPosts";
+    packet.data="NA";
+    socket.emit('getPosts', JSON.stringify(packet));
+
     // Attach event handler for event fired by server
     //basically catch whatever the server sends back
     socket.on('server', function(data) {
@@ -87,8 +99,23 @@
         user = pkt.data;
         console.log("getNew " + pkt.data);
        }
-       else if(pkt.type == "post"){
-        posts.innerHTML += "<br>" + pkt.data; // append data that we got back
+       else if(pkt.type == "add_post"){
+        //build post string
+        var postString = "<br>" + pkt.data.title + "<br>" + pkt.data.content + "<br>Posted By: " + pkt.data.user;
+        var removeButton = "<br><button>" + "Remove</button>";
+
+        // append data that we got back
+        posts.innerHTML += postString + removeButton + "<hr>"; 
+        //alert(data);
+       }
+       else if(pkt.type == "getPosts"){
+        //build post string
+        var postString = "<br>" + pkt.data.title + "<br>" + pkt.data.content + "<br>Posted By: " + pkt.data.user;
+        var removeButton = "<br><button>" + "Remove</button>";
+
+        // append data that we got back
+        posts.innerHTML += postString + removeButton + "<hr>"; 
+        //alert(data);
        }
        else if(pkt.type == "getUsers"){
         users.innerHTML += "<br>" + pkt.data; // append data that we got back
@@ -118,7 +145,37 @@
 
       //redirect
       window.location.replace("index.html");
-    }   
+    }
+
+    //add post code
+    document.getElementById("addPost").onclick = function() {add_post()};
+
+    function add_post() {
+      //document.getElementById("logout").innerHTML = "YOU CLICKED ME!";
+      //make packet type addPost
+      packet.type="add_post";
+
+      //build the post
+      var pst = {
+        title:document.getElementById("postTitle").value,
+        content:document.getElementById("postContent").value,
+        user:user
+      };
+
+      //add post to packet data
+      packet.data=pst;
+
+      //send post to server
+      socket.emit('add_post', JSON.stringify(packet));
+
+      //clear post fields
+      document.getElementById("postTitle").value = "";
+      document.getElementById("postContent").value = "Post content...";
+
+      //alert(document.getElementById("postTitle").value);
+      //alert(JSON.stringify(packet));
+
+    }  
 
   </script>
 </body>
