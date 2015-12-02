@@ -203,6 +203,26 @@ io.sockets.on('connection', function(socket) {
     
   });
 
+  //edit_post
+  socket.on('edit_post', function(content) {
+
+    //display in console
+    console.log("edit_post:" + content);
+
+    //parse the json so we can work with it
+    var pkt = JSON.parse(content);
+
+    //edit post in the posts array
+    posts[pkt.data.id].title = pkt.data.title;
+    posts[pkt.data.id].content = pkt.data.content;
+    posts[pkt.data.id].user = pkt.data.user;
+
+    //broadcast success message
+    pkt.type = "add_post";
+    sendAll(JSON.stringify(pkt));
+    
+  });
+
 });
 
 //broadcast the content to everyone connected

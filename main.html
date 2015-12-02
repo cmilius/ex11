@@ -94,9 +94,11 @@
         var postString = pkt.data.title + "<br>" + pkt.data.content + "<br>Posted By: " + pkt.data.user;
         var id = pkt.data.id;
         var removeButton = "<br><button onclick=\"remove_post(" + id + ")\">" + "Remove</button>";
+        var editButton = "<br><button onclick=\"edit_post(" + id + ")\">" + "Submit Edit</button>";
+
 
         // append data that we got back
-        posts.innerHTML += "<br>" + "<hr>" + postString + removeButton /*+ id*/ + "<hr>"; 
+        posts.innerHTML += "<br>" + "<hr>" + postString + editButton + removeButton /*+ id*/ + "<hr>"; 
       }
       else if(pkt.type == "getUsers"){
         users.innerHTML += "<br>" + pkt.data; // append data that we got back
@@ -160,6 +162,25 @@
       packet.type="remove_post";
       packet.data=postID;
       socket.emit('remove_post', JSON.stringify(packet));
+    }
+
+    //edit post code
+    function edit_post(postID) {
+      var editPst = {
+        title:document.getElementById("postTitle").value ,
+        content:document.getElementById("postContent").value,
+        user:user,
+        id:postID
+      };
+
+      //build packet for post to remove
+      packet.type="edit_post";
+      packet.data=editPst;
+      socket.emit('edit_post', JSON.stringify(packet));
+
+      //clear post fields
+      document.getElementById("postTitle").value = "";
+      document.getElementById("postContent").value = "Post content...";
     }
 
   </script>

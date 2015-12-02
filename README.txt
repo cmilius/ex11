@@ -21,6 +21,12 @@ removed from the posts feed.  Any other user logged in can remove posts as well.
 are stored in memory and are lost if the server is restarted.  Posts are shown in order 
 from most recent at top and oldest at the bottom always.
 
-3. When you want to logout, just click the logout button in the upper right corner, and 
+3. To edit a post, type the desired edit content in the areas on the top of the screen, 
+just like when you are creating a post.  When you are done, instead of clicking the "add 
+post" button, click the submit edit button next to the desired post that you want edited. 
+The edit will replace the content of that post, as well as update the value of the user 
+who submitted it to the last person who edited the post.
+
+4. When you want to logout, just click the logout button in the upper right corner, and 
 you will be shown the login screen again.  The user who logged out will also be removed 
 from the users logged in list for everyone else who is still logged in.
